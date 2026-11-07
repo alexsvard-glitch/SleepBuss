@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101a2c">
+<title>SleepBuss</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 25px 18px;
+  background: #101a2c;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+main {
+  max-width: 430px;
+  margin: 35px auto;
+}
+
+h1 {
+  text-align: center;
+  font-size: 36px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #aab9d0;
+}
+
+.panel {
+  background: #1d2b43;
+  padding: 22px;
+  border-radius: 18px;
+  margin-top: 25px;
+}
+
+label {
+  display: block;
+  margin: 18px 0 8px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 12px;
+  background: #72baff;
+  color: #101a2c;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+#status {
+  color: #b8d9ff;
+  text-align: center;
+  margin-top: 20px;
+}
+
+footer {
+  color: #91a1b8;
+  text-align: center;
+  font-size: 12px;
+  margin-top: 30px;
+}
+</style>
+</head>
+
+<body>
+<main>
+  <h1>🌙 SleepBuss</h1>
+  <p class="subtitle">Sov lugnt. Vakna i tid.</p>
+
+  <section class="panel">
+    <h2>Din resa</h2>
+
+    <label for="home">Din hemhållplats</label>
+    <input id="home" placeholder="Exempel: Kista centrum">
+
+    <label for="destination">Var vill du gå av?</label>
+    <input id="destination" placeholder="Din hållplats">
+
+    <label for="early">Hur många hållplatser före?</label>
+    <input id="early" type="number" min="1" max="5" value="1">
+
+    <button onclick="saveTrip()">
+      Spara min resa
+    </button>
+
+    <button onclick="testAlarm()">
+      Testa larmet 🔔
+    </button>
+
+    <p id="status">Välkommen till SleepBuss!</p>
+  </section>
+
+  <footer>
+    Kollektivtrafikdata: kommer att integreras från Trafiklab.
+    <br>
+    Detta är en testversion, inte ett fungerande reselarm.
+  </footer>
+</main>
+
+<script>
+function saveTrip() {
+  const home = document.getElementById("home").value;
+  const destination =
+    document.getElementById("destination").value;
+  const early = document.getElementById("early").value;
+
+  if (!home.trim() || !destination.trim()) {
+    document.getElementById("status").textContent =
+      "Fyll i båda hållplatserna först!";
+    return;
+  }
+
+  localStorage.setItem("sleepbussHome", home);
+  localStorage.setItem("sleepbussDestination", destination);
+  localStorage.setItem("sleepbussEarly", early);
+
+  document.getElementById("status").textContent =
+    "Din resa är sparad! 🌙";
+}
+
+function testAlarm() {
+  const AudioContext =
+    window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContext) {
+    document.getElementById("status").textContent =
+      "Ljudtest stöds inte i denna webbläsare.";
+    return;
+  }
+
+  const audio = new AudioContext();
+  const oscillator = audio.createOscillator();
+  const volume = audio.createGain();
+
+  oscillator.frequency.value = 880;
+  volume.gain.value = 0.15;
+
+  oscillator.connect(volume);
+  volume.connect(audio.destination);
+
+  oscillator.start();
+
+  document.getElementById("status").textContent =
+    "Larmtest pågår! 🔔";
+
+  setTimeout(() => {
+    oscillator.stop();
+    audio.close();
+    document.getElementById("status").textContent =
+      "Larmtest klart!";
+  }, 3000);
+}
+
+window.addEventListener("load", () => {
+  document.getElementById("home").value =
+    localStorage.getItem("sleepbussHome") || "";
+
+  document.getElementById("destination").value =
+    localStorage.getItem("sleepbussDestination") || "";
+
+  document.getElementById("early").value =
+    localStorage.getItem("sleepbussEarly") || "1";
+});
+</script>
+</body>
+</html>
