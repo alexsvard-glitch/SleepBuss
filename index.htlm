@@ -4,182 +4,359 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#101a2c">
+<meta name="theme-color" content="#10284f">
 <title>SleepBuss</title>
 
 <style>
-* {
-  box-sizing: border-box;
+:root {
+  --bg: #08162e;
+  --panel: #10284f;
+  --panel2: #183761;
+  --accent: #55aaff;
+  --text: #ffffff;
+  --muted: #b8c9df;
+  --good: #58d6a0;
 }
-
+[data-theme="green"] {
+  --bg: #09251d;
+  --panel: #123c30;
+  --panel2: #1b5140;
+  --accent: #58d6a0;
+  --text: #ffffff;
+  --muted: #c0ded1;
+  --good: #8be6b9;
+}
+* { box-sizing: border-box; }
 body {
   margin: 0;
-  padding: 25px 18px;
-  background: #101a2c;
-  color: white;
-  font-family: Arial, sans-serif;
+  padding: 22px 16px 40px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
-
-main {
-  max-width: 430px;
-  margin: 35px auto;
-}
-
-h1 {
-  text-align: center;
-  font-size: 36px;
-}
-
-.subtitle {
-  text-align: center;
-  color: #aab9d0;
-}
-
+main { max-width: 520px; margin: auto; }
+header { text-align: center; padding: 20px 0; }
+.logo { font-size: 48px; }
+h1 { font-size: 34px; margin: 5px 0; }
+.subtitle { color: var(--muted); }
 .panel {
-  background: #1d2b43;
-  padding: 22px;
-  border-radius: 18px;
-  margin-top: 25px;
+  background: var(--panel);
+  border-radius: 20px;
+  padding: 19px;
+  margin: 16px 0;
 }
-
-label {
-  display: block;
-  margin: 18px 0 8px;
-}
-
-input {
+h2 { font-size: 19px; margin: 0 0 13px; }
+label { display: block; margin: 13px 0 7px; color: var(--muted); }
+input, select {
   width: 100%;
   padding: 14px;
-  border: 0;
-  border-radius: 10px;
+  border-radius: 12px;
+  border: 1px solid #496487;
+  background: var(--bg);
+  color: var(--text);
   font-size: 16px;
 }
-
 button {
   width: 100%;
-  padding: 15px;
-  margin-top: 18px;
   border: 0;
-  border-radius: 12px;
-  background: #72baff;
-  color: #101a2c;
+  border-radius: 13px;
+  padding: 15px;
+  margin-top: 11px;
+  background: var(--accent);
+  color: #06172c;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 700;
+  cursor: pointer;
 }
-
-#status {
-  color: #b8d9ff;
-  text-align: center;
-  margin-top: 20px;
+button.secondary {
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid #496487;
 }
-
-footer {
-  color: #91a1b8;
-  text-align: center;
-  font-size: 12px;
-  margin-top: 30px;
+button:disabled { opacity: .5; }
+.result {
+  width: 100%;
+  text-align: left;
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid #496487;
+  margin-top: 8px;
 }
+.small { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.status {
+  padding: 13px;
+  background: var(--panel2);
+  border-radius: 12px;
+  line-height: 1.5;
+}
+.big-distance {
+  font-size: 34px;
+  font-weight: 800;
+  margin: 8px 0;
+}
+.hidden { display: none; }
+footer { text-align: center; margin-top: 25px; }
 </style>
 </head>
 
 <body>
 <main>
-  <h1>🌙 SleepBuss</h1>
-  <p class="subtitle">Sov lugnt. Vakna i tid.</p>
+<header>
+  <div class="logo">🚌💤</div>
+  <h1>SleepBuss</h1>
+  <div class="subtitle">Sov lugnt. Håll koll på din hållplats.</div>
+</header>
 
-  <section class="panel">
-    <h2>Din resa</h2>
+<section class="panel">
+  <h2>🎨 Utseende</h2>
+  <button class="secondary" id="themeButton">Byt till grönt tema</button>
+</section>
 
-    <label for="home">Din hemhållplats</label>
-    <input id="home" placeholder="Exempel: Kista centrum">
+<section class="panel">
+  <h2>📍 Välj din destination</h2>
+  <label for="searchInput">Sök efter en hållplats</label>
+  <input id="searchInput" placeholder="Exempel: Stockholm C">
+  <button id="searchButton">Sök hållplatser</button>
+  <div id="searchStatus" class="small" aria-live="polite"></div>
+  <div id="results"></div>
+  <div id="selectedStop" class="status hidden"></div>
+</section>
 
-    <label for="destination">Var vill du gå av?</label>
-    <input id="destination" placeholder="Din hållplats">
+<section class="panel">
+  <h2>⏰ Väckningsvarning</h2>
+  <label for="distanceSelect">När ska jag varna dig?</label>
+  <select id="distanceSelect">
+    <option value="1500">Cirka 1 500 meter före</option>
+    <option value="1000" selected>Cirka 1 000 meter före</option>
+    <option value="500">Cirka 500 meter före</option>
+    <option value="300">Cirka 300 meter före</option>
+  </select>
+  <button id="testButton" class="secondary">🔔 Testa ljudet</button>
+  <button id="startButton">Starta GPS-bevakning</button>
+  <button id="stopButton" class="secondary" disabled>Stoppa bevakning</button>
+  <div id="gpsStatus" class="status" style="margin-top:14px" aria-live="polite">
+    Välj en destination för att börja.
+  </div>
+  <div id="distanceDisplay" class="big-distance"></div>
+</section>
 
-    <label for="early">Hur många hållplatser före?</label>
-    <input id="early" type="number" min="1" max="5" value="1">
+<section class="panel">
+  <h2>ℹ️ Om prototypen</h2>
+  <p class="small">
+    SleepBuss använder GPS för att uppskatta avståndet till din valda
+    hållplats. GPS kan vara osäker och telefonen kan pausa appen när
+    skärmen är låst. Testa alltid appen under säkra förhållanden.
+  </p>
+  <p class="small">
+    Hållplatsdata från <a href="https://www.trafiklab.se/"
+    style="color:var(--accent)">Trafiklab.se</a>.
+  </p>
+</section>
 
-    <button onclick="saveTrip()">
-      Spara min resa
-    </button>
-
-    <button onclick="testAlarm()">
-      Testa larmet 🔔
-    </button>
-
-    <p id="status">Välkommen till SleepBuss!</p>
-  </section>
-
-  <footer>
-    Kollektivtrafikdata: kommer att integreras från Trafiklab.
-    <br>
-    Detta är en testversion, inte ett fungerande reselarm.
-  </footer>
+<footer class="small">SleepBuss – första testversionen</footer>
 </main>
 
 <script>
-function saveTrip() {
-  const home = document.getElementById("home").value;
-  const destination =
-    document.getElementById("destination").value;
-  const early = document.getElementById("early").value;
+const API = "https://sleepbuss-api.alex-svard.workers.dev";
 
-  if (!home.trim() || !destination.trim()) {
-    document.getElementById("status").textContent =
-      "Fyll i båda hållplatserna först!";
+let selectedStop = null;
+let watchId = null;
+let audioContext = null;
+let alarmPlayed = false;
+
+const $ = id => document.getElementById(id);
+
+$("themeButton").addEventListener("click", () => {
+  const green = document.documentElement.dataset.theme !== "green";
+  document.documentElement.dataset.theme = green ? "green" : "blue";
+  $("themeButton").textContent =
+    green ? "Byt till blått tema" : "Byt till grönt tema";
+});
+
+async function searchStops() {
+  const query = $("searchInput").value.trim();
+  if (!query) {
+    $("searchStatus").textContent = "Skriv namnet på en hållplats först.";
     return;
   }
 
-  localStorage.setItem("sleepbussHome", home);
-  localStorage.setItem("sleepbussDestination", destination);
-  localStorage.setItem("sleepbussEarly", early);
+  $("searchButton").disabled = true;
+  $("searchStatus").textContent = "Söker...";
+  $("results").innerHTML = "";
 
-  document.getElementById("status").textContent =
-    "Din resa är sparad! 🌙";
+  try {
+    const response = await fetch(
+      API + "/api/stops?q=" + encodeURIComponent(query)
+    );
+    if (!response.ok) throw new Error("Serverfel: " + response.status);
+
+    const data = await response.json();
+    const groups = data.stop_groups || [];
+
+    if (!groups.length) {
+      $("searchStatus").textContent = "Hittade inga hållplatser. Prova ett annat namn.";
+      return;
+    }
+
+    $("searchStatus").textContent = "Välj din destination:";
+
+    groups.slice(0, 15).forEach(group => {
+      const button = document.createElement("button");
+      button.className = "result";
+      button.textContent = group.name;
+      button.addEventListener("click", () => chooseStop(group));
+      $("results").appendChild(button);
+    });
+  } catch (error) {
+    $("searchStatus").textContent =
+      "Kunde inte söka. Kontrollera internet och försök igen. " + error.message;
+  } finally {
+    $("searchButton").disabled = false;
+  }
 }
 
-function testAlarm() {
-  const AudioContext =
-    window.AudioContext || window.webkitAudioContext;
+function chooseStop(group) {
+  const children = (group.stops || []).filter(
+    stop => Number.isFinite(Number(stop.lat)) &&
+            Number.isFinite(Number(stop.lon))
+  );
 
-  if (!AudioContext) {
-    document.getElementById("status").textContent =
-      "Ljudtest stöds inte i denna webbläsare.";
+  if (!children.length) {
+    $("selectedStop").classList.remove("hidden");
+    $("selectedStop").textContent =
+      "Den här hållplatsen saknar GPS-koordinater. Prova en annan.";
     return;
   }
 
-  const audio = new AudioContext();
-  const oscillator = audio.createOscillator();
-  const volume = audio.createGain();
+  selectedStop = {
+    name: group.name,
+    id: group.id,
+    stops: children.map(stop => ({
+      lat: Number(stop.lat),
+      lon: Number(stop.lon)
+    }))
+  };
 
-  oscillator.frequency.value = 880;
-  volume.gain.value = 0.15;
-
-  oscillator.connect(volume);
-  volume.connect(audio.destination);
-
-  oscillator.start();
-
-  document.getElementById("status").textContent =
-    "Larmtest pågår! 🔔";
-
-  setTimeout(() => {
-    oscillator.stop();
-    audio.close();
-    document.getElementById("status").textContent =
-      "Larmtest klart!";
-  }, 3000);
+  $("selectedStop").classList.remove("hidden");
+  $("selectedStop").textContent = "Din destination: " + group.name;
+  $("results").innerHTML = "";
+  $("searchStatus").textContent = "Destination vald!";
+  alarmPlayed = false;
 }
 
-window.addEventListener("load", () => {
-  document.getElementById("home").value =
-    localStorage.getItem("sleepbussHome") || "";
+function distanceMeters(lat1, lon1, lat2, lon2) {
+  const rad = value => value * Math.PI / 180;
+  const earth = 6371000;
+  const dLat = rad(lat2 - lat1);
+  const dLon = rad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(rad(lat1)) * Math.cos(rad(lat2)) *
+    Math.sin(dLon / 2) ** 2;
+  return earth * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
-  document.getElementById("destination").value =
-    localStorage.getItem("sleepbussDestination") || "";
+function nearestDistance(position) {
+  let best = Infinity;
+  for (const stop of selectedStop.stops) {
+    const d = distanceMeters(
+      position.coords.latitude,
+      position.coords.longitude,
+      stop.lat,
+      stop.lon
+    );
+    if (d < best) best = d;
+  }
+  return best;
+}
 
-  document.getElementById("early").value =
-    localStorage.getItem("sleepbussEarly") || "1";
+function playAlarm() {
+  try {
+    audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === "suspended") audioContext.resume();
+
+    [0, 0.35, 0.7].forEach(delay => {
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.frequency.value = 880;
+      gain.gain.value = 0.18;
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start(audioContext.currentTime + delay);
+      oscillator.stop(audioContext.currentTime + delay + 0.22);
+    });
+  } catch (error) {
+    console.log("Ljud kunde inte spelas:", error);
+  }
+
+  if ("vibrate" in navigator) navigator.vibrate([300, 150, 300, 150, 500]);
+}
+
+function updatePosition(position) {
+  if (!selectedStop) return;
+
+  const distance = nearestDistance(position);
+  $("distanceDisplay").textContent =
+    Math.round(distance).toLocaleString("sv-SE") + " m";
+  $("gpsStatus").textContent = "GPS fungerar. Avstånd till destinationen:";
+
+  const threshold = Number($("distanceSelect").value);
+  if (distance <= threshold && !alarmPlayed) {
+    alarmPlayed = true;
+    $("gpsStatus").textContent =
+      "🔔 Du är nära " + selectedStop.name + "! Kontrollera var du ska kliva av.";
+    playAlarm();
+  }
+}
+
+function gpsError(error) {
+  const messages = {
+    1: "Du behöver tillåta platsåtkomst i telefonens inställningar.",
+    2: "Telefonen kunde inte hitta din position.",
+    3: "Det tog för lång tid att hitta positionen."
+  };
+  $("gpsStatus").textContent =
+    messages[error.code] || "Ett GPS-fel inträffade.";
+}
+
+$("searchButton").addEventListener("click", searchStops);
+$("searchInput").addEventListener("keydown", event => {
+  if (event.key === "Enter") searchStops();
+});
+
+$("testButton").addEventListener("click", () => {
+  playAlarm();
+  $("gpsStatus").textContent = "Testljud spelat. Hördes det?";
+});
+
+$("startButton").addEventListener("click", () => {
+  if (!selectedStop) {
+    $("gpsStatus").textContent = "Välj en destination först.";
+    return;
+  }
+  if (!("geolocation" in navigator)) {
+    $("gpsStatus").textContent = "Din webbläsare stöder inte GPS.";
+    return;
+  }
+  if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+
+  alarmPlayed = false;
+  $("gpsStatus").textContent = "Ber om GPS-position...";
+  watchId = navigator.geolocation.watchPosition(
+    updatePosition,
+    gpsError,
+    { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+  );
+
+  $("startButton").disabled = true;
+  $("stopButton").disabled = false;
+});
+
+$("stopButton").addEventListener("click", () => {
+  if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+  watchId = null;
+  $("startButton").disabled = false;
+  $("stopButton").disabled = true;
+  $("gpsStatus").textContent = "GPS-bevakningen är stoppad.";
 });
 </script>
 </body>
