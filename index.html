@@ -1,796 +1,1345 @@
 
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#07549b">
-<title>SleepBuss</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#080f20">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>CatNap</title>
 
-<link rel="stylesheet"
- href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<style>
-:root {
-  --blue: #07549b;
-  --blue2: #0b70c9;
-  --light: #eaf3fc;
-  --red: #e52b43;
-  --white: #fff;
-  --ink: #142b43;
-  --muted: #687d91;
-  --green: #16865d;
-  --border: #dce6ef;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: #edf2f7;
-  color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-button, input, select { font: inherit; }
-button { cursor: pointer; }
-.app {
-  max-width: 560px;
-  margin: auto;
-  min-height: 100vh;
-  background: #f5f8fb;
-  padding-bottom: 35px;
-}
-.top {
-  background: var(--blue);
-  color: white;
-  padding: 24px 20px 28px;
-  border-radius: 0 0 27px 27px;
-}
-.brand {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.logo {
-  font-size: 27px;
-  font-weight: 900;
-  letter-spacing: -1.3px;
-}
-.logo span { color: #ffdbdf; }
-.version {
-  font-size: 11px;
-  border: 1px solid #ffffff65;
-  border-radius: 30px;
-  padding: 6px 10px;
-}
-.top h1 {
-  font-size: 29px;
-  margin: 25px 0 5px;
-}
-.top p {
-  color: #d6e9fa;
-  font-size: 14px;
-  margin: 0;
-}
-.content { padding: 17px; }
-.card {
-  background: white;
-  padding: 18px;
-  margin-bottom: 15px;
-  border-radius: 19px;
-  box-shadow: 0 3px 13px #102d4b0b;
-}
-.card h2 {
-  font-size: 18px;
-  margin: 0 0 14px;
-}
-.tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 9px;
-  margin-bottom: 16px;
-}
-.tab {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 7px;
-  background: white;
-  color: var(--blue);
-  font-size: 14px;
-  font-weight: 750;
-}
-.tab.active {
-  background: var(--blue);
-  color: white;
-  border-color: var(--blue);
-}
-label {
-  display: block;
-  font-size: 13px;
-  color: var(--muted);
-  margin: 12px 0 7px;
-  font-weight: 650;
-}
-input, select {
-  width: 100%;
-  border: 1px solid var(--border);
-  background: #fff;
-  color: var(--ink);
-  padding: 14px;
-  border-radius: 12px;
-  outline-color: var(--blue2);
-  font-size: 16px;
-}
-.primary, .secondary, .danger {
-  border: 0;
-  width: 100%;
-  border-radius: 12px;
-  padding: 15px;
-  font-weight: 800;
-  margin-top: 11px;
-}
-.primary {
-  color: white;
-  background: var(--blue);
-}
-.secondary {
-  color: var(--blue);
-  background: var(--light);
-}
-.danger {
-  color: white;
-  background: var(--red);
-}
-button:disabled { opacity: .45; }
-.result {
-  width: 100%;
-  display: block;
-  text-align: left;
-  border: 1px solid var(--border);
-  background: white;
-  color: var(--ink);
-  border-radius: 12px;
-  padding: 13px;
-  margin-top: 8px;
-}
-.result strong { display: block; }
-.result small { color: var(--muted); }
-#map {
-  height: 350px;
-  width: 100%;
-  border-radius: 15px;
-  z-index: 1;
-  background: #dce8ee;
-}
-.map-help {
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.5;
-  margin: 10px 0 0;
-}
-.selected {
-  padding: 13px;
-  background: var(--light);
-  border-radius: 12px;
-  font-size: 14px;
-  line-height: 1.5;
-  margin-top: 12px;
-}
-.status {
-  background: var(--light);
-  border-radius: 13px;
-  padding: 14px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-.distance {
-  text-align: center;
-  color: var(--blue);
-  font-size: 37px;
-  font-weight: 900;
-  padding: 13px 0 2px;
-  letter-spacing: -1px;
-}
-.muted {
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.55;
-}
-.hidden { display: none !important; }
-.pill {
-  display: inline-block;
-  background: #e5f5ed;
-  color: var(--green);
-  border-radius: 30px;
-  padding: 5px 10px;
-  font-size: 11px;
-  font-weight: 800;
-}
-.sound-choice {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.sound-choice button {
-  padding: 12px 5px;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  background: white;
-  color: var(--blue);
-  font-size: 13px;
-  font-weight: 700;
-}
-.sound-choice button.active {
-  background: var(--light);
-  border: 2px solid var(--blue);
-}
-.footer {
-  text-align: center;
-  color: var(--muted);
-  font-size: 11px;
-  padding: 10px 20px;
-}
-</style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <style>
+    :root {
+      --bg: #080f20;
+      --bg2: #0c1730;
+      --card: rgba(18, 31, 57, .78);
+      --card-solid: #111e37;
+      --blue: #1685ff;
+      --blue-light: #55aaff;
+      --blue-glow: rgba(22, 133, 255, .25);
+      --white: #f5f8ff;
+      --muted: #91a0b9;
+      --border: rgba(148, 178, 220, .13);
+      --red: #ff5268;
+      --green: #42d6a0;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 50% -15%, rgba(22,133,255,.20), transparent 48%),
+        linear-gradient(180deg, #0b1428 0%, #080f20 55%, #070d19 100%);
+      color: var(--white);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 0 0 calc(35px + env(safe-area-inset-bottom));
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 0 19px;
+    }
+
+    header {
+      padding: calc(22px + env(safe-area-inset-top)) 2px 23px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .brand-icon {
+      width: 43px;
+      height: 43px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, #1685ff, #0751c8);
+      box-shadow: 0 5px 25px rgba(22,133,255,.35);
+      font-size: 22px;
+    }
+
+    .brand-name {
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .status-pill {
+      padding: 8px 11px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.035);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .7px;
+    }
+
+    .hero {
+      padding: 19px 4px 23px;
+    }
+
+    .eyebrow {
+      color: var(--blue-light);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: clamp(32px, 8vw, 43px);
+      line-height: 1.12;
+      letter-spacing: -2px;
+      margin: 0;
+      font-weight: 800;
+    }
+
+    h1 span {
+      color: var(--blue-light);
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+      max-width: 330px;
+      margin: 12px 0 0;
+    }
+
+    .card {
+      background: linear-gradient(145deg, rgba(21,37,67,.88), rgba(13,25,47,.88));
+      border: 1px solid var(--border);
+      border-radius: 23px;
+      padding: 19px;
+      margin-bottom: 15px;
+      box-shadow: 0 12px 35px rgba(0,0,0,.16);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .section-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: rgba(22,133,255,.13);
+      color: var(--blue-light);
+      font-size: 16px;
+    }
+
+    h2 {
+      font-size: 14px;
+      letter-spacing: -.2px;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .section-description {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      background: rgba(0,0,0,.23);
+      border: 1px solid var(--border);
+      padding: 5px;
+      border-radius: 14px;
+      margin-bottom: 17px;
+    }
+
+    .tab {
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 6px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #1685ff, #0961d7);
+      color: white;
+      box-shadow: 0 4px 16px rgba(22,133,255,.25);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    input, select {
+      width: 100%;
+      min-width: 0;
+      background: rgba(4,11,24,.65);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 14px;
+      color: var(--white);
+      outline: none;
+      font-size: 13px;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(22,133,255,.10);
+    }
+
+    input::placeholder {
+      color: #687995;
+    }
+
+    select {
+      color-scheme: dark;
+    }
+
+    .primary-btn, .secondary-btn {
+      border: 0;
+      border-radius: 13px;
+      padding: 13px 17px;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .18s, opacity .18s, box-shadow .18s;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #1685ff, #075bd2);
+      box-shadow: 0 5px 18px rgba(22,133,255,.24);
+    }
+
+    .secondary-btn {
+      background: rgba(255,255,255,.07);
+      border: 1px solid var(--border);
+      color: #dce8fa;
+    }
+
+    button:active {
+      transform: scale(.97);
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .search-row .primary-btn {
+      flex-shrink: 0;
+    }
+
+    .results {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .result-item {
+      padding: 13px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.035);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .result-item:active {
+      background: rgba(22,133,255,.12);
+    }
+
+    .result-name {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .result-detail {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .result-arrow {
+      color: var(--blue-light);
+      font-size: 19px;
+    }
+
+    .map-panel {
+      display: none;
+    }
+
+    .map-panel.active {
+      display: block;
+    }
+
+    #map {
+      width: 100%;
+      height: 290px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #111e37;
+      z-index: 1;
+    }
+
+    .map-hint {
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+
+    .map-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .map-actions button {
+      flex: 1;
+    }
+
+    .destination-box {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      background: rgba(22,133,255,.075);
+      border: 1px solid rgba(22,133,255,.18);
+      border-radius: 15px;
+      padding: 13px;
+      margin-top: 15px;
+    }
+
+    .destination-symbol {
+      width: 35px;
+      height: 35px;
+      flex-shrink: 0;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(22,133,255,.17);
+      color: var(--blue-light);
+    }
+
+    .destination-label {
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .destination-name {
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .distance-display {
+      text-align: center;
+      padding: 23px 10px 18px;
+    }
+
+    .distance-label {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .distance-number {
+      font-size: 57px;
+      letter-spacing: -4px;
+      font-weight: 800;
+      margin: 8px 0 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .distance-number span {
+      font-size: 16px;
+      letter-spacing: 0;
+      color: var(--blue-light);
+      margin-left: 4px;
+    }
+
+    .distance-status {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .progress-track {
+      height: 5px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.08);
+      overflow: hidden;
+      margin: 19px 0 7px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #0870ed, #60baff);
+      box-shadow: 0 0 13px rgba(22,133,255,.7);
+      transition: width .4s;
+    }
+
+    .distance-foot {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .setting-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      margin: 17px 0 9px;
+    }
+
+    .setting-label:first-of-type {
+      margin-top: 0;
+    }
+
+    .setting-note {
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .sound-test {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .sound-test button {
+      flex: 1;
+    }
+
+    .location-button {
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    .main-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 15px;
+    }
+
+    .main-actions button {
+      padding: 15px 9px;
+    }
+
+    .alarm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(5,11,24,.96);
+      backdrop-filter: blur(20px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 25px;
+      text-align: center;
+    }
+
+    .alarm-overlay.active {
+      display: flex;
+    }
+
+    .alarm-content {
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .alarm-cat {
+      font-size: 65px;
+      margin-bottom: 18px;
+      filter: drop-shadow(0 0 25px rgba(22,133,255,.5));
+    }
+
+    .alarm-content h2 {
+      font-size: 30px;
+      letter-spacing: -1px;
+      margin-bottom: 10px;
+    }
+
+    .alarm-content p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .alarm-content button {
+      width: 100%;
+      padding: 17px;
+      font-size: 14px;
+    }
+
+    .message {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.6;
+      margin-top: 12px;
+      min-height: 17px;
+    }
+
+    .notice {
+      border: 1px solid rgba(255,180,80,.16);
+      background: rgba(255,180,80,.055);
+      color: #c8b99f;
+      border-radius: 13px;
+      padding: 12px;
+      font-size: 10px;
+      line-height: 1.65;
+      margin-top: 14px;
+    }
+
+    footer {
+      text-align: center;
+      color: #52627c;
+      font-size: 9px;
+      letter-spacing: 1.4px;
+      padding: 15px 0 5px;
+      text-transform: uppercase;
+    }
+
+    .leaflet-container {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+      background: #12213c;
+      color: white;
+    }
+
+    .leaflet-popup-content {
+      font-size: 11px;
+    }
+
+    @media (max-width: 370px) {
+      .app { padding: 0 13px; }
+      .card { padding: 15px; }
+      .distance-number { font-size: 49px; }
+    }
+  </style>
 </head>
 
 <body>
 <div class="app">
 
-<header class="top">
-  <div class="brand">
-    <div class="logo">sleep<span>buss</span> 🚌</div>
-    <div class="version">VERSION 2.0</div>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🐈‍⬛</div>
+      <div>
+        <div class="brand-name">CatNap</div>
+        <div class="brand-subtitle">Wake up on time</div>
+      </div>
+    </div>
+    <div class="status-pill" id="connectionStatus">● READY</div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Your personal travel alarm</div>
+    <h1>Sleep well.<br><span>Arrive awake.</span></h1>
+    <p>Relax during your journey. CatNap helps you keep track of how close you are to your destination.</p>
+  </section>
+
+  <section class="card">
+    <div class="section-heading">
+      <div class="section-icon">⌖</div>
+      <div>
+        <h2>Choose your destination</h2>
+        <div class="section-description">Where should CatNap wake you up?</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="searchTab" onclick="chooseTab('search')">⌕ &nbsp; Search stop</button>
+      <button class="tab" id="mapTab" onclick="chooseTab('map')">◎ &nbsp; Pick on map</button>
+    </div>
+
+    <div id="searchPanel">
+      <div class="search-row">
+        <input id="stopSearch" type="search" placeholder="Search for a bus stop..." autocomplete="off">
+        <button class="primary-btn" id="searchButton" onclick="searchStops()">Search</button>
+      </div>
+      <div class="results" id="searchResults"></div>
+      <div class="message" id="searchMessage"></div>
+    </div>
+
+    <div class="map-panel" id="mapPanel">
+      <div id="map"></div>
+      <div class="map-hint">Tap anywhere on the map to set your destination.</div>
+      <div class="map-actions">
+        <button class="secondary-btn" onclick="locateOnMap()">My location</button>
+        <button class="secondary-btn" onclick="clearDestination()">Clear pin</button>
+      </div>
+    </div>
+
+    <div class="destination-box">
+      <div class="destination-symbol">✦</div>
+      <div style="min-width:0">
+        <div class="destination-label">Selected destination</div>
+        <div class="destination-name" id="destinationName">No destination selected</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-heading">
+      <div class="section-icon">◉</div>
+      <div>
+        <h2>Distance tracker</h2>
+        <div class="section-description">Your distance from the destination</div>
+      </div>
+    </div>
+
+    <div class="distance-display">
+      <div class="distance-label">Distance remaining</div>
+      <div class="distance-number" id="distanceNumber">--<span>m</span></div>
+      <div class="distance-status" id="distanceStatus">Waiting for location</div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="distance-foot">
+        <span>Start</span>
+        <span id="targetDistanceLabel">Alarm at 500 m</span>
+      </div>
+    </div>
+
+    <button class="secondary-btn location-button" id="locationButton" onclick="startTracking()">◎ &nbsp; Enable location tracking</button>
+    <div class="message" id="locationMessage">Allow location access when your browser asks.</div>
+  </section>
+
+  <section class="card">
+    <div class="section-heading">
+      <div class="section-icon">⚙</div>
+      <div>
+        <h2>Alarm settings</h2>
+        <div class="section-description">Customize your wake-up experience</div>
+      </div>
+    </div>
+
+    <label class="setting-label" for="alarmDistance">Wake me up when I am within</label>
+    <select id="alarmDistance" onchange="updateDistanceSetting()">
+      <option value="300">300 metres</option>
+      <option value="500" selected>500 metres</option>
+      <option value="1000">1 kilometre</option>
+      <option value="1500">1.5 kilometres</option>
+      <option value="2000">2 kilometres</option>
+    </select>
+
+    <label class="setting-label" for="soundChoice">Alarm sound</label>
+    <select id="soundChoice">
+      <option value="classic">Classic</option>
+      <option value="strong">Strong wake-up</option>
+      <option value="soft">Soft tones</option>
+      <option value="digital">Digital pulse</option>
+    </select>
+
+    <div class="sound-test">
+      <button class="secondary-btn" onclick="testSound()">▷ Test sound</button>
+      <button class="secondary-btn" onclick="stopAlarm()">■ Stop sound</button>
+    </div>
+
+    <div class="notice">
+      <strong>Important:</strong> CatNap uses your browser's location and sound features. On iPhone, Safari may pause location tracking and audio when the screen is locked or the app is in the background. Do not rely on CatNap as your only alarm.
+    </div>
+  </section>
+
+  <div class="main-actions">
+    <button class="primary-btn" id="startButton" onclick="startJourney()">Start journey</button>
+    <button class="secondary-btn" onclick="resetJourney()">Reset</button>
   </div>
-  <h1>Sov hela vägen.</h1>
-  <p>Vi hjälper dig hålla koll på när det är dags att vakna.</p>
-</header>
 
-<div class="content">
+  <div class="message" id="journeyMessage" style="text-align:center"></div>
 
-<section class="card">
-  <h2>📍 Vart ska du vakna?</h2>
-
-  <div class="tabs">
-    <button class="tab active" id="searchTab">🔎 Sök hållplats</button>
-    <button class="tab" id="mapTab">🗺️ Välj på kartan</button>
-  </div>
-
-  <div id="searchPanel">
-    <label for="searchInput">Sök efter hållplats</label>
-    <input id="searchInput" placeholder="T.ex. T-Centralen">
-    <button class="primary" id="searchButton">Sök hållplatser</button>
-    <div id="searchStatus" class="muted" style="margin-top:10px"></div>
-    <div id="results"></div>
-  </div>
-
-  <div id="mapPanel" class="hidden">
-    <div id="map"></div>
-    <p class="map-help">
-      Tryck på kartan där du vill att SleepBuss ska varna dig.
-      Du kan flytta kartan och välja en annan punkt när du vill.
-    </p>
-    <button class="secondary" id="myLocationButton">
-      ◎ Visa min position
-    </button>
-  </div>
-
-  <div id="selectedBox" class="selected hidden" aria-live="polite">
-    <span class="pill">DESTINATION VALD</span>
-    <div id="selectedName" style="font-weight:800;margin-top:7px"></div>
-    <button class="secondary" id="clearButton">Ändra destination</button>
-  </div>
-</section>
-
-<section class="card">
-  <h2>🔔 När ska alarmet låta?</h2>
-
-  <label for="distanceSelect">Avstånd från destinationen</label>
-  <select id="distanceSelect">
-    <option value="2000">2 000 meter före</option>
-    <option value="1500">1 500 meter före</option>
-    <option value="1000" selected>1 000 meter före</option>
-    <option value="500">500 meter före</option>
-    <option value="300">300 meter före</option>
-  </select>
-
-  <label>Välj larmljud</label>
-  <div class="sound-choice">
-    <button class="active" data-sound="classic">⏰ Klassisk</button>
-    <button data-sound="strong">🚨 Väckarklocka</button>
-    <button data-sound="soft">🌙 Mjuk</button>
-    <button data-sound="digital">📱 Digital</button>
-  </div>
-
-  <button class="secondary" id="testButton">▶ Testa valt ljud</button>
-  <button class="primary" id="startButton">STARTA SLEEPBUSS</button>
-  <button class="danger hidden" id="stopAlarmButton">STOPPA ALARMET</button>
-  <button class="secondary" id="stopButton" disabled>Stoppa GPS-bevakning</button>
-
-  <div class="status" id="status" style="margin-top:15px" aria-live="polite">
-    Välj en destination för att börja.
-  </div>
-
-  <div class="distance" id="distanceDisplay">—</div>
-  <div class="muted" style="text-align:center">meter till vald destination</div>
-</section>
-
-<section class="card">
-  <h2>🧭 Din resa</h2>
-  <div id="travelStatus" class="muted">
-    Ingen GPS-bevakning är startad.
-  </div>
-</section>
-
-<section class="card">
-  <h2>ℹ️ Bra att veta</h2>
-  <p class="muted">
-    SleepBuss använder telefonens GPS och mäter avståndet till din
-    valda punkt. Avståndet är fågelvägen, inte längs bussens väg.
-    En vald kartpunkt är inte automatiskt en busshållplats.
-  </p>
-  <p class="muted">
-    GPS och ljud kan pausas av iPhone när appen ligger i bakgrunden
-    eller när skärmen är låst. Använd inte prototypen som enda
-    väckning. Testa först under en resa när du är vaken.
-  </p>
-  <p class="muted">
-    Kartdata © OpenStreetMap-bidragsgivare.
-  </p>
-</section>
-
+  <footer>CATNAP · TRAVEL SMART · SLEEP EASY</footer>
 </div>
-<div class="footer">SLEEPBUSS · DIN RESA, DITT ALARM</div>
+
+<div class="alarm-overlay" id="alarmOverlay">
+  <div class="alarm-content">
+    <div class="alarm-cat">🐈‍⬛</div>
+    <h2>Time to wake up!</h2>
+    <p>You are getting close to your destination.<br>Get ready to leave.</p>
+    <button class="primary-btn" onclick="dismissAlarm()">I'm awake</button>
+  </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-const API = "https://sleepbuss-api.alex-svard.workers.dev";
+  // Your Cloudflare Worker. Keep your Trafiklab API key in Cloudflare,
+  // never in this frontend file.
+  const API_BASE = "https://sleepbuss-api.alex-svard.workers.dev";
 
-let destination = null;
-let map = null;
-let destinationMarker = null;
-let destinationCircle = null;
-let currentMarker = null;
-let currentLine = null;
-let watchId = null;
-let alarmPlayed = false;
-let alarmTimer = null;
-let audioContext = null;
-let selectedSound = "classic";
-let mapReady = false;
+  let map = null;
+  let destination = null;
+  let destinationPoints = [];
+  let destinationMarker = null;
+  let destinationCircle = null;
+  let userMarker = null;
+  let userAccuracyCircle = null;
+  let userPosition = null;
+  let routeLine = null;
+  let watchId = null;
+  let journeyActive = false;
+  let alarmTriggered = false;
+  let audioContext = null;
+  let alarmInterval = null;
+  let alarmTimeout = null;
+  let lastDistance = null;
 
-const $ = id => document.getElementById(id);
+  const $ = id => document.getElementById(id);
 
-function setStatus(message) {
-  $("status").textContent = message;
-}
-
-function showDestination(name) {
-  $("selectedBox").classList.remove("hidden");
-  $("selectedName").textContent = name;
-}
-
-function clearDestination() {
-  destination = null;
-  alarmPlayed = false;
-  $("selectedBox").classList.add("hidden");
-  $("distanceDisplay").textContent = "—";
-  setStatus("Välj en ny destination.");
-  if (destinationMarker) map.removeLayer(destinationMarker);
-  if (destinationCircle) map.removeLayer(destinationCircle);
-  destinationMarker = null;
-  destinationCircle = null;
-}
-
-function chooseTab(which) {
-  $("searchPanel").classList.toggle("hidden", which !== "search");
-  $("mapPanel").classList.toggle("hidden", which !== "map");
-  $("searchTab").classList.toggle("active", which === "search");
-  $("mapTab").classList.toggle("active", which === "map");
-
-  if (which === "map") {
-    initializeMap();
-    setTimeout(() => map && map.invalidateSize(), 100);
-  }
-}
-
-$("searchTab").addEventListener("click", () => chooseTab("search"));
-$("mapTab").addEventListener("click", () => chooseTab("map"));
-$("clearButton").addEventListener("click", clearDestination);
-
-function initializeMap() {
-  if (mapReady) return;
-  if (typeof L === "undefined") {
-    $("map").textContent = "Kunde inte ladda kartan. Kontrollera internet.";
-    return;
+  function setStatus(text) {
+    $("connectionStatus").textContent = "● " + text;
   }
 
-  map = L.map("map").setView([59.3293, 18.0686], 12);
+  function chooseTab(tab) {
+    const search = tab === "search";
+    $("searchTab").classList.toggle("active", search);
+    $("mapTab").classList.toggle("active", !search);
+    $("searchPanel").style.display = search ? "block" : "none";
+    $("mapPanel").classList.toggle("active", !search);
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  }).addTo(map);
-
-  map.on("click", event => {
-    setMapDestination(
-      event.latlng.lat,
-      event.latlng.lng,
-      "Vald punkt på kartan"
-    );
-  });
-
-  mapReady = true;
-}
-
-function setMapDestination(lat, lon, name) {
-  destination = {
-    name,
-    points: [{ lat: Number(lat), lon: Number(lon) }]
-  };
-  alarmPlayed = false;
-  showDestination(name);
-
-  if (!map) return;
-
-  if (destinationMarker) map.removeLayer(destinationMarker);
-  if (destinationCircle) map.removeLayer(destinationCircle);
-
-  destinationMarker = L.marker([lat, lon]).addTo(map)
-    .bindPopup("<b>SleepBuss destination</b><br>" + name).openPopup();
-
-  destinationCircle = L.circle([lat, lon], {
-    radius: Number($("distanceSelect").value),
-    color: "#e52b43",
-    fillColor: "#e52b43",
-    fillOpacity: 0.12,
-    weight: 2
-  }).addTo(map);
-
-  map.setView([lat, lon], Math.max(map.getZoom(), 14));
-}
-
-function chooseStop(name, points) {
-  destination = { name, points };
-  alarmPlayed = false;
-  showDestination(name);
-
-  const first = points[0];
-  chooseTab("map");
-  initializeMap();
-  setTimeout(() => {
-    if (map) {
-      setMapDestination(first.lat, first.lon, name);
-      destination.points = points;
-      if (points.length > 1) {
-        destination.name = name;
-        showDestination(name + " (" + points.length + " lägen)");
-      }
-    }
-  }, 150);
-}
-
-function getCoordinate(stop, names) {
-  for (const name of names) {
-    const value = stop && stop[name];
-    if (value !== undefined && value !== null && value !== "") {
-      const number = Number(value);
-      if (Number.isFinite(number)) return number;
+    if (!search) {
+      initializeMap();
+      setTimeout(() => {
+        if (map) map.invalidateSize();
+      }, 150);
     }
   }
-  return null;
-}
 
-function extractGroups(data) {
-  if (Array.isArray(data)) return data;
-  return data.stop_groups ||
-         data.stopGroups ||
-         data.stops ||
-         data.results ||
-         data.data ||
-         [];
-}
+  function initializeMap() {
+    if (map) return;
 
-function extractPoints(group) {
-  const children = Array.isArray(group.stops) && group.stops.length
-    ? group.stops : [group];
+    map = L.map("map", {
+      zoomControl: false
+    }).setView([59.3293, 18.0686], 12);
 
-  return children.map(stop => {
-    const lat = getCoordinate(stop, ["lat", "latitude"]);
-    const lon = getCoordinate(stop, ["lon", "lng", "longitude"]);
-    if (lat === null || lon === null) return null;
-    return { lat, lon };
-  }).filter(Boolean);
-}
-
-async function searchStops() {
-  const query = $("searchInput").value.trim();
-  if (!query) {
-    $("searchStatus").textContent = "Skriv en hållplats först.";
-    return;
-  }
-
-  $("searchButton").disabled = true;
-  $("searchStatus").textContent = "Söker efter hållplatser...";
-  $("results").innerHTML = "";
-
-  try {
-    const response = await fetch(
-      API + "/api/stops?q=" + encodeURIComponent(query)
-    );
-    if (!response.ok) throw new Error("Serverfel " + response.status);
-
-    const data = await response.json();
-    const groups = extractGroups(data);
-    let count = 0;
-
-    groups.slice(0, 20).forEach(group => {
-      const points = extractPoints(group);
-      if (!points.length) return;
-
-      const name = group.name || group.stop_name || "Hållplats";
-      const button = document.createElement("button");
-      button.className = "result";
-
-      const title = document.createElement("strong");
-      title.textContent = name;
-      const detail = document.createElement("small");
-      detail.textContent = "Välj som destination";
-
-      button.append(title, detail);
-      button.addEventListener("click", () => {
-        chooseStop(name, points);
-      });
-
-      $("results").appendChild(button);
-      count++;
-    });
-
-    $("searchStatus").textContent = count
-      ? "Hittade " + count + " hållplatser. Välj en nedan."
-      : "Hittade inga hållplatser med GPS-position. Prova ett annat namn.";
-  } catch (error) {
-    $("searchStatus").textContent =
-      "Sökningen misslyckades. Kontrollera internet och försök igen.";
-  } finally {
-    $("searchButton").disabled = false;
-  }
-}
-
-$("searchButton").addEventListener("click", searchStops);
-$("searchInput").addEventListener("keydown", event => {
-  if (event.key === "Enter") searchStops();
-});
-
-$("myLocationButton").addEventListener("click", () => {
-  if (!navigator.geolocation) {
-    setStatus("GPS stöds inte av den här webbläsaren.");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(position => {
-    const lat = position.coords.latitude;
-    const lon = position.coords.longitude;
-    initializeMap();
-    map.setView([lat, lon], 16);
-    if (currentMarker) map.removeLayer(currentMarker);
-    currentMarker = L.circleMarker([lat, lon], {
-      radius: 9, color: "#07549b", fillColor: "#ffffff", fillOpacity: 1
-    }).addTo(map).bindPopup("Din position");
-  }, () => {
-    setStatus("Kunde inte hämta positionen. Kontrollera GPS-tillståndet.");
-  }, { enableHighAccuracy: true, timeout: 15000 });
-});
-
-$("distanceSelect").addEventListener("change", () => {
-  if (destinationCircle) {
-    destinationCircle.setRadius(Number($("distanceSelect").value));
-  }
-});
-
-$("sound-choice");
-
-document.querySelectorAll("[data-sound]").forEach(button => {
-  button.addEventListener("click", () => {
-    selectedSound = button.dataset.sound;
-    document.querySelectorAll("[data-sound]").forEach(item =>
-      item.classList.toggle("active", item === button)
-    );
-  });
-});
-
-function getAudio() {
-  const Audio = window.AudioContext || window.webkitAudioContext;
-  if (!Audio) throw new Error("Ljud stöds inte");
-  if (!audioContext) audioContext = new Audio();
-  if (audioContext.state === "suspended") audioContext.resume();
-  return audioContext;
-}
-
-function tone(frequency, start, duration, volume, type) {
-  const ctx = getAudio();
-  const oscillator = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  oscillator.type = type || "sine";
-  oscillator.frequency.setValueAtTime(frequency, start);
-
-  gain.gain.setValueAtTime(0.001, start);
-  gain.gain.linearRampToValueAtTime(volume, start + 0.025);
-  gain.gain.setValueAtTime(volume, start + duration - 0.04);
-  gain.gain.linearRampToValueAtTime(0.001, start + duration);
-
-  oscillator.connect(gain);
-  gain.connect(ctx.destination);
-  oscillator.start(start);
-  oscillator.stop(start + duration);
-}
-
-function playSoundOnce() {
-  const ctx = getAudio();
-  const now = ctx.currentTime + 0.05;
-
-  if (selectedSound === "classic") {
-    [880, 660, 880, 660].forEach((f, i) =>
-      tone(f, now + i * 0.35, 0.23, 0.20, "square")
-    );
-  } else if (selectedSound === "strong") {
-    [880, 880, 660, 880, 660, 880].forEach((f, i) =>
-      tone(f, now + i * 0.23, 0.19, 0.23, "sawtooth")
-    );
-  } else if (selectedSound === "soft") {
-    [523, 659, 784].forEach((f, i) =>
-      tone(f, now + i * 0.4, 0.34, 0.15, "sine")
-    );
-  } else {
-    [1047, 784, 1047, 1319].forEach((f, i) =>
-      tone(f, now + i * 0.25, 0.18, 0.18, "square")
-    );
-  }
-}
-
-function stopAlarm() {
-  if (alarmTimer) clearInterval(alarmTimer);
-  alarmTimer = null;
-  $("stopAlarmButton").classList.add("hidden");
-  if (navigator.vibrate) navigator.vibrate(0);
-  setStatus("Alarmet är stoppat.");
-}
-
-function startAlarm() {
-  if (alarmPlayed) return;
-  alarmPlayed = true;
-  setStatus("🔔 NU ÄR DET DAGS! Du närmar dig din destination!");
-  $("stopAlarmButton").classList.remove("hidden");
-  playSoundOnce();
-  alarmTimer = setInterval(playSoundOnce, 2500);
-  if (navigator.vibrate) navigator.vibrate([500, 250, 500, 250, 800]);
-}
-
-$("testButton").addEventListener("click", () => {
-  try {
-    playSoundOnce();
-    setStatus("Testljud spelas. Hör du alarmet?");
-  } catch (error) {
-    setStatus("Kunde inte spela ljud. Prova igen.");
-  }
-});
-
-$("stopAlarmButton").addEventListener("click", stopAlarm);
-
-function distanceBetween(lat1, lon1, lat2, lon2) {
-  const rad = n => n * Math.PI / 180;
-  const dLat = rad(lat2 - lat1);
-  const dLon = rad(lon2 - lon1);
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(rad(lat1)) * Math.cos(rad(lat2)) *
-    Math.sin(dLon / 2) ** 2;
-  return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function onPosition(position) {
-  if (!destination) return;
-
-  const lat = position.coords.latitude;
-  const lon = position.coords.longitude;
-
-  let nearest = Infinity;
-  let nearestPoint = null;
-
-  destination.points.forEach(point => {
-    const distance = distanceBetween(lat, lon, point.lat, point.lon);
-    if (distance < nearest) {
-      nearest = distance;
-      nearestPoint = point;
-    }
-  });
-
-  $("distanceDisplay").textContent = Math.round(nearest).toLocaleString("sv-SE");
-
-  $("travelStatus").textContent =
-    "GPS aktiv. Noggrannhet cirka " +
-    Math.round(position.coords.accuracy) + " meter.";
-
-  if (map) {
-    if (currentMarker) map.removeLayer(currentMarker);
-    currentMarker = L.circleMarker([lat, lon], {
-      radius: 8,
-      color: "#07549b",
-      fillColor: "#ffffff",
-      fillOpacity: 1,
-      weight: 3
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap"
     }).addTo(map);
 
-    if (currentLine) map.removeLayer(currentLine);
-    if (nearestPoint) {
-      currentLine = L.polyline([
-        [lat, lon],
-        [nearestPoint.lat, nearestPoint.lon]
-      ], { color: "#e52b43", dashArray: "6 7" }).addTo(map);
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+
+    map.on("click", event => {
+      setMapDestination(event.latlng.lat, event.latlng.lng, "Map destination");
+    });
+  }
+
+  function setMapDestination(lat, lon, name) {
+    destination = { lat, lon, name };
+    destinationPoints = [{ lat, lon, name }];
+
+    if (!map) initializeMap();
+
+    if (destinationMarker) map.removeLayer(destinationMarker);
+    if (destinationCircle) map.removeLayer(destinationCircle);
+
+    destinationMarker = L.marker([lat, lon]).addTo(map)
+      .bindPopup("Your CatNap destination").openPopup();
+
+    destinationCircle = L.circle([lat, lon], {
+      radius: Number($("alarmDistance").value),
+      color: "#1685ff",
+      fillColor: "#1685ff",
+      fillOpacity: .10,
+      weight: 1
+    }).addTo(map);
+
+    $("destinationName").textContent = name || "Selected map location";
+    updateDistanceSetting();
+
+    if (userPosition) updateDistance(userPosition.lat, userPosition.lon);
+  }
+
+  function clearDestination() {
+    destination = null;
+    destinationPoints = [];
+
+    if (destinationMarker && map) map.removeLayer(destinationMarker);
+    if (destinationCircle && map) map.removeLayer(destinationCircle);
+
+    destinationMarker = null;
+    destinationCircle = null;
+
+    $("destinationName").textContent = "No destination selected";
+    $("distanceNumber").innerHTML = '--<span>m</span>';
+    $("distanceStatus").textContent = "Choose a destination first";
+    $("progressFill").style.width = "0%";
+  }
+
+  function updateDistanceSetting() {
+    const threshold = Number($("alarmDistance").value);
+    $("targetDistanceLabel").textContent = "Alarm at " + threshold.toLocaleString("en-US") + " m";
+
+    if (destinationCircle && map) {
+      destinationCircle.setRadius(threshold);
+    }
+
+    if (lastDistance !== null) {
+      updateDistanceDisplay(lastDistance);
     }
   }
 
-  const threshold = Number($("distanceSelect").value);
-  if (nearest <= threshold && !alarmPlayed) {
-    startAlarm();
-  } else if (!alarmPlayed) {
-    setStatus("SleepBuss bevakar din destination. Du är på väg!");
-  }
-}
+  function extractPoints(data) {
+    const found = [];
 
-function gpsError(error) {
-  const messages = {
-    1: "Tillåt platsåtkomst i Safari-inställningarna.",
-    2: "Telefonen kunde inte hitta din position.",
-    3: "GPS tog för lång tid. Försök igen."
-  };
-  setStatus(messages[error.code] || "Ett GPS-fel inträffade.");
-}
+    function addPoint(item, fallbackName) {
+      if (!item || typeof item !== "object") return;
 
-$("startButton").addEventListener("click", () => {
-  if (!destination) {
-    setStatus("Välj en hållplats eller en punkt på kartan först.");
-    return;
-  }
+      const lat = Number(
+        item.lat ?? item.latitude ?? item.y ?? item.stop_lat
+      );
 
-  if (!navigator.geolocation) {
-    setStatus("Din webbläsare stöder inte GPS.");
-    return;
-  }
+      const lon = Number(
+        item.lon ?? item.lng ?? item.longitude ?? item.x ?? item.stop_lon
+      );
 
-  try {
-    getAudio();
-  } catch (error) {
-    setStatus("Ljudet kunde inte startas. Testa ljudknappen först.");
-    return;
-  }
-
-  if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-
-  alarmPlayed = false;
-  setStatus("Startar GPS-bevakning...");
-  $("startButton").disabled = true;
-  $("stopButton").disabled = false;
-
-  watchId = navigator.geolocation.watchPosition(
-    onPosition,
-    gpsError,
-    {
-      enableHighAccuracy: true,
-      maximumAge: 3000,
-      timeout: 20000
+      if (Number.isFinite(lat) && Number.isFinite(lon) &&
+          Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+        found.push({
+          lat,
+          lon,
+          name: item.name || item.stop_name || item.label || fallbackName || "Bus stop",
+          id: item.id || item.stop_id || item.stopId || null
+        });
+      }
     }
-  );
-});
 
-$("stopButton").addEventListener("click", () => {
-  if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-  watchId = null;
-  $("startButton").disabled = false;
-  $("stopButton").disabled = true;
-  $("travelStatus").textContent = "GPS-bevakningen är stoppad.";
-  setStatus("Bevakningen är stoppad.");
-});
+    function walk(value, depth = 0) {
+      if (!value || depth > 5) return;
 
+      if (Array.isArray(value)) {
+        value.forEach(item => walk(item, depth + 1));
+        return;
+      }
+
+      if (typeof value !== "object") return;
+
+      const hasLat = value.lat != null || value.latitude != null ||
+                     value.stop_lat != null;
+
+      const hasLon = value.lon != null || value.lng != null ||
+                     value.longitude != null || value.stop_lon != null;
+
+      if (hasLat && hasLon) {
+        addPoint(value);
+        return;
+      }
+
+      Object.values(value).forEach(item => walk(item, depth + 1));
+    }
+
+    walk(data);
+
+    const unique = new Map();
+    found.forEach(point => {
+      unique.set(point.id || `${point.lat},${point.lon}`, point);
+    });
+
+    return [...unique.values()].slice(0, 30);
+  }
+
+  async function searchStops() {
+    const query = $("stopSearch").value.trim();
+
+    if (query.length < 2) {
+      $("searchMessage").textContent = "Enter at least two characters.";
+      return;
+    }
+
+    $("searchButton").disabled = true;
+    $("searchMessage").textContent = "Searching for stops...";
+    $("searchResults").innerHTML = "";
+
+    try {
+      const response = await fetch(
+        API_BASE + "/api/stops?q=" + encodeURIComponent(query)
+      );
+
+      if (!response.ok) {
+        throw new Error("The stop search service returned an error.");
+      }
+
+      const data = await response.json();
+      const points = extractPoints(data);
+
+      if (!points.length) {
+        $("searchMessage").textContent =
+          "No stops with usable map coordinates were found. Try another search.";
+        return;
+      }
+
+      $("searchMessage").textContent = "Select your destination:";
+      const results = $("searchResults");
+
+      points.forEach(point => {
+        const item = document.createElement("div");
+        item.className = "result-item";
+
+        const info = document.createElement("div");
+
+        const name = document.createElement("div");
+        name.className = "result-name";
+        name.textContent = point.name;
+
+        const detail = document.createElement("div");
+        detail.className = "result-detail";
+        detail.textContent = "Bus stop · Select destination";
+
+        info.append(name, detail);
+
+        const arrow = document.createElement("div");
+        arrow.className = "result-arrow";
+        arrow.textContent = "›";
+
+        item.append(info, arrow);
+        item.addEventListener("click", () => chooseStop(point));
+
+        results.appendChild(item);
+      });
+
+    } catch (error) {
+      $("searchMessage").textContent =
+        "Could not search for stops. Please check your connection and try again.";
+      console.error(error);
+    } finally {
+      $("searchButton").disabled = false;
+    }
+  }
+
+  function chooseStop(point) {
+    destination = {
+      lat: point.lat,
+      lon: point.lon,
+      name: point.name
+    };
+
+    destinationPoints = [destination];
+
+    $("destinationName").textContent = point.name;
+    chooseTab("map");
+
+    setTimeout(() => {
+      initializeMap();
+
+      if (map) {
+        map.setView([point.lat, point.lon], 16);
+        setMapDestination(point.lat, point.lon, point.name);
+      }
+    }, 200);
+
+    $("searchMessage").textContent = "Destination selected.";
+  }
+
+  $("stopSearch").addEventListener("keydown", event => {
+    if (event.key === "Enter") searchStops();
+  });
+
+  function locateOnMap() {
+    if (!navigator.geolocation) {
+      $("locationMessage").textContent = "Location is not supported by this browser.";
+      return;
+    }
+
+    $("locationMessage").textContent = "Finding your location...";
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        initializeMap();
+        map.setView([lat, lon], 16);
+
+        $("locationMessage").textContent = "Your location is shown on the map.";
+      },
+      () => {
+        $("locationMessage").textContent =
+          "Could not access your location. Check browser permissions.";
+      },
+      { enableHighAccuracy: true, timeout: 12000 }
+    );
+  }
+
+  function startTracking() {
+    if (!navigator.geolocation) {
+      $("locationMessage").textContent =
+        "Location services are not supported by this browser.";
+      return;
+    }
+
+    if (watchId !== null) return;
+
+    $("locationMessage").textContent = "Requesting location permission...";
+
+    watchId = navigator.geolocation.watchPosition(
+      position => {
+        userPosition = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude
+        };
+
+        $("locationMessage").textContent =
+          "Location tracking is active.";
+
+        setStatus("TRACKING");
+
+        if (!map) initializeMap();
+
+        const point = [userPosition.lat, userPosition.lon];
+
+        if (!userMarker) {
+          userMarker = L.circleMarker(point, {
+            radius: 8,
+            color: "#ffffff",
+            weight: 3,
+            fillColor: "#1685ff",
+            fillOpacity: 1
+          }).addTo(map).bindPopup("Your current location");
+        } else {
+          userMarker.setLatLng(point);
+        }
+
+        if (userAccuracyCircle) {
+          map.removeLayer(userAccuracyCircle);
+        }
+
+        userAccuracyCircle = L.circle(point, {
+          radius: Math.min(position.coords.accuracy || 30, 150),
+          color: "#55aaff",
+          weight: 1,
+          fillOpacity: .04
+        }).addTo(map);
+
+        if (destination) {
+          updateDistance(userPosition.lat, userPosition.lon);
+        }
+
+      },
+      error => {
+        let message = "Could not get your location.";
+
+        if (error.code === 1) {
+          message = "Location permission was denied. Allow location access in your browser settings.";
+        } else if (error.code === 2) {
+          message = "Your location is currently unavailable.";
+        } else if (error.code === 3) {
+          message = "Location request timed out. Please try again.";
+        }
+
+        $("locationMessage").textContent = message;
+        setStatus("LOCATION OFF");
+
+        watchId = null;
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 3000,
+        timeout: 15000
+      }
+    );
+
+    $("locationButton").textContent = "◎ Location tracking enabled";
+  }
+
+  function distanceBetween(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const rad = degrees => degrees * Math.PI / 180;
+
+    const dLat = rad(lat2 - lat1);
+    const dLon = rad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(rad(lat1)) * Math.cos(rad(lat2)) *
+      Math.sin(dLon / 2) ** 2;
+
+    return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function updateDistance(lat, lon) {
+    if (!destination) return;
+
+    let distance = distanceBetween(
+      lat, lon, destination.lat, destination.lon
+    );
+
+    // If a future destination contains several candidate points,
+    // use the closest one.
+    if (destinationPoints.length > 1) {
+      destinationPoints.forEach(point => {
+        const d = distanceBetween(lat, lon, point.lat, point.lon);
+        if (d < distance) distance = d;
+      });
+    }
+
+    lastDistance = distance;
+    updateDistanceDisplay(distance);
+
+    if (journeyActive && !alarmTriggered &&
+        distance <= Number($("alarmDistance").value)) {
+      triggerAlarm();
+    }
+  }
+
+  function updateDistanceDisplay(distance) {
+    const rounded = Math.round(distance);
+    const threshold = Number($("alarmDistance").value);
+
+    if (rounded >= 1000) {
+      $("distanceNumber").innerHTML =
+        (rounded / 1000).toFixed(2) + '<span>km</span>';
+    } else {
+      $("distanceNumber").innerHTML =
+        rounded.toLocaleString("en-US") + '<span>m</span>';
+    }
+
+    const progress = Math.max(0, Math.min(100,
+      (1 - distance / (threshold * 3)) * 100
+    ));
+
+    $("progressFill").style.width = progress + "%";
+
+    if (distance <= threshold) {
+      $("distanceStatus").textContent = "You are within your alarm zone.";
+    } else {
+      $("distanceStatus").textContent = "Tracking your journey...";
+    }
+  }
+
+  function startJourney() {
+    if (!destination) {
+      $("journeyMessage").textContent =
+        "Please select a destination first.";
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      $("journeyMessage").textContent =
+        "Location services are not supported.";
+      return;
+    }
+
+    if (alarmTriggered) {
+      alarmTriggered = false;
+    }
+
+    // Unlock audio after a direct user interaction.
+    prepareAudio();
+
+    journeyActive = true;
+    startTracking();
+
+    $("startButton").textContent = "Journey active";
+    $("journeyMessage").textContent =
+      "CatNap is tracking your distance. Keep the app open.";
+
+    setStatus("ACTIVE");
+
+    if (userPosition) {
+      updateDistance(userPosition.lat, userPosition.lon);
+    }
+  }
+
+  function resetJourney() {
+    journeyActive = false;
+    alarmTriggered = false;
+    lastDistance = null;
+
+    stopAlarm();
+
+    $("startButton").textContent = "Start journey";
+    $("journeyMessage").textContent = "Journey reset.";
+    $("distanceNumber").innerHTML = '--<span>m</span>';
+    $("distanceStatus").textContent = "Waiting for location";
+    $("progressFill").style.width = "0%";
+
+    setStatus("READY");
+  }
+
+  function prepareAudio() {
+    try {
+      if (!audioContext) {
+        const AudioContextClass =
+          window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContextClass) return;
+
+        audioContext = new AudioContextClass();
+      }
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+    } catch (error) {
+      console.error("Audio could not be initialized:", error);
+    }
+  }
+
+  function playTone(frequency, duration, volume = 0.16, type = "sine") {
+    if (!audioContext) return;
+
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+
+    gain.gain.setValueAtTime(0.001, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(
+      volume, audioContext.currentTime + 0.04
+    );
+    gain.gain.exponentialRampToValueAtTime(
+      0.001, audioContext.currentTime + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + duration + 0.05);
+  }
+
+  function playSelectedSound() {
+    prepareAudio();
+
+    const sound = $("soundChoice").value;
+
+    if (sound === "classic") {
+      playTone(660, .22);
+      setTimeout(() => playTone(880, .35), 300);
+      setTimeout(() => playTone(660, .22), 750);
+    } else if (sound === "strong") {
+      playTone(880, .4, .22, "square");
+      setTimeout(() => playTone(1100, .4, .22, "square"), 450);
+      setTimeout(() => playTone(880, .4, .22, "square"), 900);
+    } else if (sound === "soft") {
+      playTone(523, .5, .11, "sine");
+      setTimeout(() => playTone(659, .65, .11, "sine"), 500);
+    } else if (sound === "digital") {
+      playTone(740, .12, .15, "triangle");
+      setTimeout(() => playTone(990, .12, .15, "triangle"), 180);
+      setTimeout(() => playTone(740, .12, .15, "triangle"), 360);
+      setTimeout(() => playTone(990, .35, .15, "triangle"), 540);
+    }
+  }
+
+  function testSound() {
+    prepareAudio();
+    playSelectedSound();
+  }
+
+  function triggerAlarm() {
+    if (alarmTriggered) return;
+
+    alarmTriggered = true;
+    journeyActive = false;
+
+    $("alarmOverlay").classList.add("active");
+    $("journeyMessage").textContent = "You have reached your alarm distance.";
+
+    setStatus("ALARM");
+
+    playSelectedSound();
+
+    alarmInterval = setInterval(() => {
+      if (!alarmTriggered) return;
+      playSelectedSound();
+    }, 2500);
+  }
+
+  function stopAlarm() {
+    if (alarmInterval) {
+      clearInterval(alarmInterval);
+      alarmInterval = null;
+    }
+
+    if (alarmTimeout) {
+      clearTimeout(alarmTimeout);
+      alarmTimeout = null;
+    }
+
+    if (audioContext && audioContext.state === "running") {
+      // The synthesized tones naturally finish shortly after playback.
+    }
+  }
+
+  function dismissAlarm() {
+    alarmTriggered = false;
+    $("alarmOverlay").classList.remove("active");
+    stopAlarm();
+
+    $("journeyMessage").textContent = "Alarm dismissed.";
+    setStatus("READY");
+  }
+
+  // Start with a clean interface.
+  setStatus("READY");
 </script>
 </body>
 </html>
